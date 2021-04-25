@@ -3,6 +3,6 @@ declare namespace NodeJS {
     NODE_ENV: string;
     VUE_ROUTER_MODE: 'hash' | 'history' | 'abstract' | undefined;
     VUE_ROUTER_BASE: string | undefined;
-    VUE_URLBASE: 'sds';
+    VUE_URLBASE: 'https://filters.dev.speedio.com.br/api/v3';
   }
 }

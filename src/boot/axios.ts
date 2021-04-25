@@ -8,6 +8,7 @@ declare module 'vue/types/vue' {
 }
 
 export default boot(({ Vue }) => {
+  const _axios = axios.create({baseURL: 'https://filters.dev.speedio.com.br/api/v3'});
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  Vue.prototype.$axios = axios;
+  Vue.prototype.$axios = _axios;
 });
