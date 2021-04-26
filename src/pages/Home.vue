@@ -37,7 +37,7 @@
 
 <script lang="ts">
 import { Component, Vue, Watch } from 'vue-property-decorator';
-import { InfoInput } from '../models/mdoel_info_input';
+import { InfoInput } from '../models/model_info_input';
 import { IFilter, FilterOption, Filter } from '../models/model_category';
 
 @Component({})
