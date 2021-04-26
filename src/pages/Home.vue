@@ -1,12 +1,7 @@
 <template>
-  <q-page-container class="row justify-around">
-    <div>
-      <q-input
-        rounded
-        outlined
-        v-model="inputCnaes.value"
-        :label="inputCnaes.label"
-      />
+  <q-page-container class="row justify-evenly">
+    <div class="q-card col-11 col-md-5 q-mb-md">
+      <q-input outlined v-model="inputCnaes.value" :label="inputCnaes.label" />
       <div class="q-pa-md">
         <q-table
           title="CNAEs"
@@ -21,13 +16,8 @@
         />
       </div>
     </div>
-    <div>
-      <q-input
-        rounded
-        outlined
-        v-model="inputCountry.value"
-        :label="inputCountry.label"
-      />
+    <div class="q-card col-11 col-md-5 q-mb-md">
+      <q-input outlined v-model="inputCountry.value" :label="inputCountry.label" />
       <div class="q-pa-md">
         <q-table
           title="Municipios"
@@ -82,12 +72,12 @@ export default class Home extends Vue {
     }
   ];
 
-  created() {
-    this.permissionNewRequest();
+  async created(): Promise<void> {
+    await this.permissionNewRequest();
   }
 
   @Watch('inputCnaes', { deep: true })
-  filterCnaes() {
+  filterCnaes(): void {
     this.cnaesFiltred = [
       ...this.cnaes.filter(e => {
         return e.label
@@ -98,7 +88,7 @@ export default class Home extends Vue {
   }
 
   @Watch('inputCountry', { deep: true })
-  filterCountry() {
+  filterCountry(): void {
     this.countryFiltred = [
       ...this.country.filter(e => {
         return e.label
@@ -109,19 +99,19 @@ export default class Home extends Vue {
   }
 
   @Watch('selectedsCnaes', { deep: true })
-  saveSelectedsCnaes() {
+  saveSelectedsCnaes(): void {
     localStorage.setItem('selectedsCnaes', JSON.stringify(this.selectedsCnaes));
   }
 
   @Watch('selectedsCountry', { deep: true })
-  saveSelectedsCountry() {
+  saveSelectedsCountry(): void {
     localStorage.setItem(
       'selectedsCountry',
       JSON.stringify(this.selectedsCountry)
     );
   }
 
-  async getFilters() {
+  async getFilters(): Promise<void> {
     try {
       console.log('new request');
       const response = await this.$axios.get('filters.json');
@@ -162,7 +152,7 @@ export default class Home extends Vue {
     return response.filters.find(e => e.id == id) || { filterOptions: [] };
   }
 
-  permissionNewRequest() {
+  async permissionNewRequest(): Promise<void> {
     const lastRequestString = localStorage.getItem('lastRequest') || '';
     let lastRequest;
     if (lastRequestString) {
@@ -173,7 +163,7 @@ export default class Home extends Vue {
     if (!lastRequest) {
       //first request
       localStorage.setItem('lastRequest', Date());
-      this.getFilters();
+      await this.getFilters();
     } else {
       //no first request
       const now = new Date();
@@ -183,7 +173,7 @@ export default class Home extends Vue {
       if (minutes >= 5) {
         //local data no is valid
         localStorage.setItem('lastRequest', Date());
-        this.getFilters();
+        await this.getFilters();
       } else {
         //local data is valid
         this.filters = JSON.parse(
@@ -195,3 +185,8 @@ export default class Home extends Vue {
   }
 }
 </script>
+<style scoped>
+.width {
+  max-width: 90%;
+}
+</style>

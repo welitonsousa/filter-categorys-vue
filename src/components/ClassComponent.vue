@@ -25,11 +25,11 @@ export default class ClassComponent extends Vue {
 
   clickCount = 0;
 
-  increment() {
+  increment() :void {
     this.clickCount += 1;
   }
 
-  get todoCount() {
+  get todoCount(): number {
     return this.todos.length;
   }
 }
