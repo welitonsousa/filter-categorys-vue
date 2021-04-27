@@ -48,7 +48,6 @@ module.exports = {
 
     'vue/component-name-in-template-casing': ['error', 'PascalCase'],
     '@typescript-eslint/explicit-function-return-type': 'off',
-    'ignoreVoid': 'on',
     '@typescript-eslint/no-unsafe-member-access': ['off'],
   }
 }

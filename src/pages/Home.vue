@@ -1,155 +1,40 @@
 <template>
   <q-page-container class="row justify-evenly">
-    <div class="q-card col-11 col-md-5 q-mb-md">
-      <q-input outlined v-model="inputCnaes.value" :label="inputCnaes.label" />
-      <div class="q-pa-md">
-        <q-table
-          title="CNAEs"
-          row-key="value"
-          selection="multiple"
-          rows-per-page-label="Itens por página"
-          :hide-selected-banner="true"
-          :data="cnaesFiltred"
-          :selected.sync="selectedsCnaes"
-          :pagination.sync="paginationCnaes"
-          :columns="columns"
-        />
-      </div>
-    </div>
-    <div class="q-card col-11 col-md-5 q-mb-md">
-      <q-input outlined v-model="inputCountry.value" :label="inputCountry.label" />
-      <div class="q-pa-md">
-        <q-table
-          title="Municipios"
-          row-key="value"
-          selection="multiple"
-          rows-per-page-label="Itens por página"
-          :hide-selected-banner="true"
-          :data="countryFiltred"
-          :selected.sync="selectedsCountry"
-          :pagination.sync="paginationCoutry"
-          :columns="columns"
-        />
-      </div>
-    </div>
+    <component-filter :label="'Cnaes'" :listItems="filters" :saveName="'cnaes'" :idFilter="1" :idFilterCatefory="1"/>
+    <component-filter :label="'Municipios'" :listItems="filters" :saveName="'country'" :idFilter="2" :idFilterCatefory="7"/>
   </q-page-container>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from 'vue-property-decorator';
-import { InfoInput } from '../models/model_info_input';
-import { IFilter, FilterOption, Filter } from '../models/model_category';
+import { Component, Vue } from 'vue-property-decorator';
+import { IFilter } from '../models/model_category';
+import componentFilter from '../components/componentFilterMultiSelect.vue';
 
-@Component({})
+@Component({
+  components: {
+    componentFilter
+  }
+})
+
 export default class Home extends Vue {
-  inputCnaes = new InfoInput('Digite aqui', '');
-  inputCountry = new InfoInput('Digite aqui', '');
-
   filters: IFilter[] = [];
-
-  selectedsCnaes = JSON.parse(
-    localStorage.getItem('selectedsCnaes') || '[]'
-  ) as [];
-  cnaes: FilterOption[] = [];
-  cnaesFiltred: FilterOption[] = [];
-
-  selectedsCountry = JSON.parse(
-    localStorage.getItem('selectedsCountry') || '[]'
-  ) as [];
-  country: FilterOption[] = [];
-  countryFiltred: FilterOption[] = [];
-
-  paginationCnaes = { rowsPerPage: 10 };
-  paginationCoutry = { rowsPerPage: 10 };
-
-  columns = [
-    {
-      name: 'label',
-      label: 'Grupo de setores',
-      align: 'left',
-      field: 'label',
-      sortable: true
-    }
-  ];
 
   async created(): Promise<void> {
     await this.permissionNewRequest();
   }
 
-  @Watch('inputCnaes', { deep: true })
-  filterCnaes(): void {
-    this.cnaesFiltred = [
-      ...this.cnaes.filter(e => {
-        return e.label
-          .toLowerCase()
-          .includes(this.inputCnaes.value.toLowerCase());
-      })
-    ];
-  }
-
-  @Watch('inputCountry', { deep: true })
-  filterCountry(): void {
-    this.countryFiltred = [
-      ...this.country.filter(e => {
-        return e.label
-          .toLowerCase()
-          .includes(this.inputCountry.value.toLowerCase());
-      })
-    ];
-  }
-
-  @Watch('selectedsCnaes', { deep: true })
-  saveSelectedsCnaes(): void {
-    localStorage.setItem('selectedsCnaes', JSON.stringify(this.selectedsCnaes));
-  }
-
-  @Watch('selectedsCountry', { deep: true })
-  saveSelectedsCountry(): void {
-    localStorage.setItem(
-      'selectedsCountry',
-      JSON.stringify(this.selectedsCountry)
-    );
-  }
-
   async getFilters(): Promise<void> {
     try {
-      console.log('new request');
       const response = await this.$axios.get('filters.json');
       this.filters = response.data.filters as IFilter[];
-      this.addData(this.filters, true);
+      this.saveFilters();
     } catch (error) {
       console.log(error);
     }
   }
 
-  addData(filters: IFilter[], save: boolean): void {
-    if (save) {
-      localStorage.setItem('filters', JSON.stringify(this.filters));
-    }
-
-    //get cnaes
-    this.cnaes = this.searchCategoriesById(
-      this.searchFilterById(filters, 1),
-      1
-    ).filterOptions;
-    this.cnaesFiltred = [...this.cnaes];
-
-    //get country
-    this.country = this.searchCategoriesById(
-      this.searchFilterById(filters, 2),
-      7
-    ).filterOptions;
-    this.countryFiltred = [...this.country];
-  }
-
-  searchFilterById(filters: IFilter[], id: number): IFilter {
-    return (
-      filters.find((filter: IFilter) => filter.id == id) || { filters: [] }
-    );
-  }
-
-  searchCategoriesById(response: IFilter, id: number): Filter {
-    return response.filters.find(e => e.id == id) || { filterOptions: [] };
+  saveFilters(): void {
+    localStorage.setItem('filters', JSON.stringify(this.filters));
   }
 
   async permissionNewRequest(): Promise<void> {
@@ -165,7 +50,7 @@ export default class Home extends Vue {
       localStorage.setItem('lastRequest', Date());
       await this.getFilters();
     } else {
-      //no first request
+      //no first requ5rest
       const now = new Date();
       const diff = Math.abs(now.getTime() - lastRequest.getTime());
       const minutes = Math.floor(Math.abs(diff) / 1000 / 60);
@@ -176,17 +61,11 @@ export default class Home extends Vue {
         await this.getFilters();
       } else {
         //local data is valid
-        this.filters = JSON.parse(
+        this.filters = await JSON.parse(
           localStorage.getItem('filters') || '[]'
         ) as IFilter[];
-        this.addData(this.filters, false);
       }
     }
   }
 }
 </script>
-<style scoped>
-.width {
-  max-width: 90%;
-}
-</style>
